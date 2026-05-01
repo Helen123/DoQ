@@ -1,0 +1,38 @@
+// ── DoQ GBA Pokemon 像素主题 Token ──────────────────────────────
+
+:root {
+  // 色板
+  --px-navy:   #1a2f5c;   // 深蓝，侧边栏/边框/主文字
+  --px-blue:   #2d4a8a;   // 中蓝，用户气泡/次级按钮
+  --px-sky:    #8aadd4;   // 浅蓝，辅助文字/hover
+  --px-gold:   #ffd700;   // 金色，重点高亮/按钮
+  --px-white:  #e8f4ff;   // 偏蓝白，内容区背景
+  --px-bg:     #c8dff7;   // 主背景浅蓝
+  --px-red:    #c0392b;   // 红色点缀
+  --px-muted:  #6b8ab8;   // 灰蓝，次要文字
+
+  // 字体
+  --px-font-pixel: 'Press Start 2P', monospace;
+  --px-font-body:  'Pingfang SC', 'Microsoft Yahei', Inter, sans-serif;
+
+  // 圆角全归零
+  --px-radius: 0px;
+
+  // 边框
+  --px-border-sm:  2px solid var(--px-navy);
+  --px-border-md:  3px solid var(--px-navy);
+
+  // 像素立体阴影（无 blur）
+  --px-shadow-3d:  3px 3px 0 var(--px-navy);
+  --px-shadow-btn: 4px 4px 0 var(--px-navy);
+  --px-shadow-gold: 3px 3px 0 #b8960a;
+
+  // 扫描线（纯 CSS，无图片依赖）
+  --px-scanline: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(26, 47, 92, 0.05) 3px,
+    rgba(26, 47, 92, 0.05) 4px
+  );
+}

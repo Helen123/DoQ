@@ -1,0 +1,42 @@
+services:
+  swxy_api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    hostname: swxy_api
+    container_name: swxy_api
+    environment:
+      - HF_ENDPOINT=https://hf-mirror.com
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+      - /Users/apple/nltk_data:/usr/local/nltk_data
+    command: ["uvicorn", "app_main:app", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+    depends_on:
+      - redis
+    networks:
+      - gsk_network
+
+  redis:
+    container_name: gsk_redis
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - gsk_network
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  gsk_network:
+    driver: bridge

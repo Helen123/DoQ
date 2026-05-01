@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" shape-rendering="crispEdges">
+  <!-- navy background -->
+  <rect width="32" height="32" fill="#1a2f5c"/>
+  <!-- pixel gem (gold diamond) -->
+  <rect x="8"  y="2"  width="16" height="4" fill="#ffd700"/>
+  <rect x="4"  y="6"  width="24" height="4" fill="#ffd700"/>
+  <rect x="2"  y="10" width="28" height="4" fill="#ffe84d"/>
+  <rect x="4"  y="14" width="24" height="4" fill="#ffd700"/>
+  <rect x="8"  y="18" width="16" height="4" fill="#ffd700"/>
+  <rect x="12" y="22" width="8"  height="4" fill="#b8960a"/>
+  <rect x="14" y="26" width="4"  height="4" fill="#b8960a"/>
+  <!-- shine pixel -->
+  <rect x="8"  y="10" width="4"  height="2" fill="#fff9c4"/>
+</svg>
