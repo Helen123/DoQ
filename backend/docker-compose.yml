@@ -16,6 +16,7 @@ services:
       - "8000:8000"
     volumes:
       - ./app:/app/app
+      - ./docs:/app/docs
       - /Users/apple/nltk_data:/usr/local/nltk_data
     command: ["uvicorn", "app_main:app", "--host", "0.0.0.0", "--port", "8000"]
     restart: unless-stopped

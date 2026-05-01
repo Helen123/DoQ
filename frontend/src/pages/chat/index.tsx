@@ -1,5 +1,4 @@
 import * as api from '@/api'
-import IconEdit from '@/assets/chat/edit.svg'
 import Markdown from '@/components/markdown'
 import ComPageLayout from '@/components/page-layout'
 import ComSender from '@/components/sender'
@@ -7,7 +6,7 @@ import { ChatRole, ChatType } from '@/configs'
 import { deviceActions } from '@/store/device'
 import { usePageTransport } from '@/utils'
 import { useMount, useRequest, useUnmount } from 'ahooks'
-import { Button, Drawer } from 'antd'
+import { Drawer } from 'antd'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { proxy, useSnapshot } from 'valtio'
@@ -54,10 +53,7 @@ export default function Index() {
 
   const history = useRequest(
     async () => {
-      const { data } = await api.session.detail({
-        session_id: id!,
-      })
-      return data
+      return []
     },
     {
       manual: true,
@@ -287,8 +283,6 @@ export default function Index() {
   useMount(async () => {
     if (ctx?.data.message) {
       send(ctx.data.message)
-    } else {
-      history.run()
     }
   })
 
@@ -349,25 +343,20 @@ export default function Index() {
         </>
       }
       right={
-        <>
-          {currentChatItem && currentChatItem.reference?.length ? (
-            <ChatDrawer title="Citations">
-              <Citations list={currentChatItem.reference} />
-            </ChatDrawer>
-          ) : (
-            <ChatDrawer title="Documents">
-              <Contracts list={documents} />
-            </ChatDrawer>
-          )}
-        </>
+        currentChatItem?.reference?.length ? (
+          <ChatDrawer title="Citations">
+            <Citations list={currentChatItem.reference} />
+          </ChatDrawer>
+        ) : documents.length > 0 ? (
+          <ChatDrawer title="Documents">
+            <Contracts list={documents} />
+          </ChatDrawer>
+        ) : undefined
       }
     >
       <div className={styles['chat-page']}>
         <div className={styles['chat-page__header']}>
           <div className={styles['chat-page__header-title']}>{title}</div>
-          <Button type="text" shape="circle">
-            <img src={IconEdit} />
-          </Button>
         </div>
 
         <ChatMessage

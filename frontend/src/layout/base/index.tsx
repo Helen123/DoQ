@@ -1,18 +1,15 @@
-import iconNewchat from '@/assets/layout/newchat.svg'
-import iconRepository from '@/assets/layout/repository.svg'
 import logo from '@/assets/logo.png'
 import { deviceState } from '@/store/device'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useSnapshot } from 'valtio'
 import { Background } from './background'
-import { Footer } from './footer'
 import './index.scss'
-import { Nav } from './nav'
 
 const TITLE = import.meta.env.VITE_TITLE
 
 export function BaseLayout({ children }: { children?: React.ReactNode }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const device = useSnapshot(deviceState)
 
   return (
@@ -26,33 +23,20 @@ export function BaseLayout({ children }: { children?: React.ReactNode }) {
           />
           <span className="title">{TITLE}</span>
         </div>
-
-        <div className="base-layout__sidebar-main scrollbar-style">
-          <div className="base-layout__sidebar-main-content">
-            <div
-              className="base-layout__nav-header"
-              onClick={() => (device.chatting ? null : navigate('/'))}
-            >
-              <img className="base-layout__nav-header-icon" src={iconNewchat} />
-              <span className="base-layout__nav-header-title">New Chat</span>
-            </div>
-
-            <Nav />
-
-            <div
-              className="base-layout__nav-header"
-              onClick={() => (device.chatting ? null : navigate('/repository'))}
-            >
-              <img
-                className="base-layout__nav-header-icon"
-                src={iconRepository}
-              />
-              <span className="base-layout__nav-header-title">Knowledge</span>
-            </div>
+        <nav className="base-layout__nav">
+          <div
+            className={`base-layout__nav-item${location.pathname !== '/repository' ? ' active' : ''}`}
+            onClick={() => navigate('/')}
+          >
+            ▶ CHAT
           </div>
-
-          <Footer />
-        </div>
+          <div
+            className={`base-layout__nav-item${location.pathname === '/repository' ? ' active' : ''}`}
+            onClick={() => navigate('/repository')}
+          >
+            ▶ KNOWLEDGE
+          </div>
+        </nav>
       </div>
 
       <div className="base-layout__content">{children}</div>

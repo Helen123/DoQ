@@ -19,20 +19,21 @@ def generate_recommended_questions(question: str, retrieved_content: list) -> li
     context_info = f"当前对话基于这些文档：{', '.join(doc_names[:3])}" if doc_names else ""
 
     prompt = f"""
-你是一个智能助手，请基于用户的问题生成3个相关的推荐问题，帮助用户更深入地探索这个话题。
+You are a helpful assistant. Based on the user's question, generate 3 relevant follow-up questions in English to help them explore the topic more deeply.
 
-用户问题：{question}
+User question: {question}
 {context_info}
 
-要求：
-1. 生成的问题应该与用户问题相关，但从不同角度深入
-2. 问题要具体、有价值
-3. 返回JSON格式，包含recommended_questions数组
+Requirements:
+1. Questions must be in English
+2. Each question should explore the topic from a different angle
+3. Questions should be specific and insightful
+4. Return JSON with a recommended_questions array
 
-输出格式：
-{{"recommended_questions": ["具体问题1", "具体问题2", "具体问题3"]}}
+Output format:
+{{"recommended_questions": ["Question 1", "Question 2", "Question 3"]}}
 
-请直接返回JSON，不要包含其他文字。
+Return only the JSON, no other text.
     """
     try:
         completion = _client().chat.completions.create(

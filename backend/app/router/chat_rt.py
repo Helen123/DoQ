@@ -2,10 +2,10 @@ import uuid
 import os
 import redis as redis_lib
 from fastapi import APIRouter, Body, Query, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from dotenv import load_dotenv
 from schemas.chat import SessionResponse, ChatRequest
-from service.core.retrieval import retrieve_content
+from service.core.retrieval import retrieve_content, list_documents
 from service.core.chat import get_chat_completion
 from utils import logger
 
@@ -14,6 +14,7 @@ load_dotenv()
 router = APIRouter()
 
 DAILY_LIMIT = int(os.getenv("DAILY_MESSAGE_LIMIT", "20"))
+DOCS_DIR = os.getenv("DOCS_DIR", "/app/docs")
 
 
 def _redis():
@@ -57,6 +58,25 @@ async def create_session():
         "status": "success",
         "message": "Session created successfully",
     }
+
+
+@router.get("/preview/{filename:path}")
+async def preview_document(filename: str):
+    file_path = os.path.join(DOCS_DIR, filename)
+    if not os.path.realpath(file_path).startswith(os.path.realpath(DOCS_DIR)):
+        raise HTTPException(status_code=400, detail="Invalid path")
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path, media_type="application/pdf")
+
+
+@router.get("/documents")
+async def get_documents():
+    try:
+        docs = list_documents()
+        return {"documents": docs}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/chat_on_docs")

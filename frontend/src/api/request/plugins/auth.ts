@@ -1,22 +1,12 @@
-import { router } from '@/router/routes'
-import { userActions, userState } from '@/store/user'
+import { getGuestId } from '@/utils/guest'
 import { ResponseError } from '../error'
 import { IRequestPlugin } from './plugin'
 import { MESSAGE_KEY } from './service'
 
-const AUTH_ERROR_MAP = {
-  401: 'Session expired, please log in again',
-}
-
-const blackList = ['/login']
-
 export const authPlugin: IRequestPlugin = {
   install(instance) {
     instance.interceptors.request.use((config) => {
-      const { token } = userState
-      if (token && !config.headers['Authorization']) {
-        config.headers['Authorization'] = `Bearer ${token}`
-      }
+      config.headers['X-Guest-ID'] = getGuestId()
       return config
     })
 
@@ -25,34 +15,16 @@ export const authPlugin: IRequestPlugin = {
       (error) => {
         const response = error.response
         if (!response) return Promise.reject(error)
-        const url = response.config.url as string
-        if (blackList.includes(url)) return Promise.reject(error)
 
         const code = response?.status
         const msg = response?.data?.[MESSAGE_KEY]
 
-        let message: string
-        switch (code) {
-          case 401:
-            // token 失效
-            userActions.setToken('')
-            router.navigate('/login')
-
-            message =
-              AUTH_ERROR_MAP[code as keyof typeof AUTH_ERROR_MAP] ||
-              msg ||
-              'Request error'
-
-            return Promise.reject(new ResponseError(message, response))
-          case 461:
-            // 知识库中没有文档
-            message = 'Please upload a document first'
-            router.navigate('/repository')
-
-            return Promise.reject(new ResponseError(message, response))
-          default:
-            return Promise.reject(error)
+        if (code === 429) {
+          const message = msg || 'Daily message limit reached. Come back tomorrow!'
+          return Promise.reject(new ResponseError(message, response))
         }
+
+        return Promise.reject(error)
       },
     )
   },

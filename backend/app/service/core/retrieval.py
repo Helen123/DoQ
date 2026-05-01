@@ -1,5 +1,5 @@
 from service.core.rag.nlp.model import generate_embedding
-from service.core.rag.utils.qdrant_conn import QdrantConnection
+from service.core.rag.utils.qdrant_conn import QdrantConnection, COLLECTION_NAME
 
 _qdrant = None
 
@@ -29,6 +29,21 @@ def retrieve_content(question: str, top_k: int = 5) -> list:
         })
 
     return extracted
+
+
+def list_documents() -> list[str]:
+    qdrant = get_qdrant()
+    results, _ = qdrant.client.scroll(
+        collection_name=COLLECTION_NAME,
+        with_payload=["docnm_kwd"],
+        limit=1000,
+    )
+    docs = sorted({
+        p.payload.get("docnm_kwd", "").split("/")[-1]
+        for p in results
+        if p.payload.get("docnm_kwd")
+    })
+    return docs
 
 
 if __name__ == "__main__":

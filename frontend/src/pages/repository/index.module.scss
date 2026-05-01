@@ -2,52 +2,165 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: 100%;
-  padding: 18px 40px;
+  min-height: 100vh;
+  padding: 28px 36px;
   box-sizing: border-box;
-  max-width: 1400px;
+  max-width: 1300px;
 
   .repository-page__header {
-    padding-top: 20px;
-    padding-bottom: 25px;
+    padding-bottom: 20px;
 
     .title {
-      font-size: 24px;
-      font-weight: bold;
-      color: #333;
+      font-family: var(--px-font-pixel);
+      font-size: 11px;
+      color: var(--px-navy);
+      letter-spacing: 2px;
+      margin-bottom: 8px;
     }
 
     .desc {
-      font-size: 16px;
-      color: #333;
+      font-size: 13px;
+      color: var(--px-muted);
     }
   }
 
-  .repository-page__body {
-    background-color: white;
-    padding: 16px;
-    border-radius: 15px;
+  .repository-page__split {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+    align-items: flex-start;
+  }
 
-    .header {
+  // ── left: file list panel ─────────────────────────────────────
+  .repository-page__list {
+    flex: 0 0 300px;
+    background-color: var(--px-white);
+    border: var(--px-border-md);
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+
+    .list-header {
+      background-color: var(--px-navy);
+      color: var(--px-gold);
+      font-family: var(--px-font-pixel);
+      font-size: 7px;
+      letter-spacing: 1.5px;
+      padding: 8px 12px;
+    }
+
+    .list-item {
       display: flex;
-      justify-content: flex-end;
+      align-items: center;
       gap: 8px;
-      margin-bottom: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(26, 47, 92, 0.12);
+      transition: background 0.1s;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background-color: rgba(255, 215, 0, 0.12);
+      }
+
+      &.selected {
+        background-color: var(--px-gold);
+        border-left: 4px solid var(--px-navy);
+
+        .item-name {
+          color: var(--px-navy);
+          font-weight: bold;
+        }
+      }
+
+      .item-icon {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+
+      .item-name {
+        font-size: 12px;
+        color: var(--px-navy);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+      }
+
+      .item-badge {
+        font-family: var(--px-font-pixel);
+        font-size: 6px;
+        color: #52c41a;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+    }
+
+    .list-empty {
+      padding: 24px 12px;
+      text-align: center;
+      color: var(--px-muted);
+      font-size: 13px;
     }
   }
 
-  .repository-page__file-name {
-    color: #0861fe;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  // ── right: preview panel ──────────────────────────────────────
+  .repository-page__preview {
+    flex: 1;
+    background-color: var(--px-white);
+    border: var(--px-border-md);
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+    display: flex;
+    flex-direction: column;
+    min-height: 640px;
 
-    .icon {
-      width: 20px;
-      height: 20px;
-      margin-right: 6px;
-      vertical-align: -0.25em;
+    .preview-header {
+      background-color: var(--px-navy);
+      color: var(--px-gold);
+      font-family: var(--px-font-pixel);
+      font-size: 7px;
+      letter-spacing: 1px;
+      padding: 8px 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .preview-iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      min-height: 600px;
+    }
+  }
+
+  .repository-page__placeholder {
+    flex: 1;
+    background-color: var(--px-white);
+    border: var(--px-border-md);
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: 12px;
+
+    .placeholder-icon {
+      font-size: 32px;
+      opacity: 0.3;
+    }
+
+    .placeholder-text {
+      font-family: var(--px-font-pixel);
+      font-size: 7px;
+      color: var(--px-muted);
+      letter-spacing: 1px;
     }
   }
 }

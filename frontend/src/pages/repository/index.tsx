@@ -1,192 +1,74 @@
 import * as api from '@/api'
-import IconDelete from '@/assets/repository/action/delete.svg'
-import IconSearch from '@/assets/repository/search.svg'
-import { PlusOutlined } from '@ant-design/icons'
 import { useRequest } from 'ahooks'
-import { Button, Input, Modal, Popconfirm, Space, Table } from 'antd'
-import { ColumnsType } from 'antd/es/table'
-import { TableRowSelection } from 'antd/es/table/interface'
-import dayjs from 'dayjs'
-import { useMemo, useRef, useState } from 'react'
+import { useState } from 'react'
 import { FileIcon } from './components/file-icon'
-import { Status } from './components/status'
-import RepositoryUpload, { RepositoryUploadRef } from './components/upload'
 import styles from './index.module.scss'
 
-type IRepository = API.Repository & {
-  id: number
-  $suffix: FileIcon
-  number: number
-  method: string
-  enable: boolean
-  status: string
+type IDoc = {
+  key: string
+  name: string
+  suffix: string
 }
 
+const API_BASE = import.meta.env.VITE_API_BASE as string
+
 export default function Index() {
-  const { data, refresh } = useRequest(async () => {
+  const [selected, setSelected] = useState<IDoc | null>(null)
+
+  const { data = [], loading } = useRequest(async () => {
     const { data } = await api.repository.list()
-    return data?.map(
-      (item, index) =>
-        ({
-          ...item,
-          $suffix: item.file_name.split('.').pop() as FileIcon,
-          id: index + 1,
-          number: 0,
-          method: 'General',
-          enable: true,
-          status: 'success',
-        }) satisfies IRepository,
-    )
+    return (data?.documents ?? []).map((name) => ({
+      key: name,
+      name,
+      suffix: name.split('.').pop() ?? 'other',
+    }))
   })
-
-  const columns = useMemo<ColumnsType<IRepository>>(
-    () => [
-      {
-        title: 'File',
-        dataIndex: 'file_name',
-        width: 200,
-        render(value, row) {
-          return (
-            <div className={styles['repository-page__file-name']} title={value}>
-              <FileIcon className={styles['icon']} suffix={row.$suffix} />
-              {value}
-            </div>
-          )
-        },
-      },
-      {
-        title: 'Chunks',
-        dataIndex: 'number',
-        width: 100,
-      },
-      {
-        title: 'Updated',
-        dataIndex: 'updated_at',
-        width: 200,
-        render(value) {
-          return dayjs(value).format('MM/DD/YYYY HH:mm:ss')
-        },
-      },
-      {
-        title: 'Method',
-        dataIndex: 'method',
-        width: 100,
-      },
-      {
-        title: 'Status',
-        dataIndex: 'status',
-        width: 100,
-        render(value) {
-          return <Status status={value} />
-        },
-      },
-      {
-        title: 'Actions',
-        dataIndex: 'action',
-        width: 100,
-        render(_, row) {
-          return (
-            <Space>
-              <Popconfirm
-                title="Delete this file?"
-                onConfirm={async () => {
-                  await api.repository.remove({ file_name: row.file_name })
-                  refresh()
-                }}
-              >
-                <Button
-                  color="default"
-                  variant="text"
-                  shape="circle"
-                  size="small"
-                >
-                  <img src={IconDelete} />
-                </Button>
-              </Popconfirm>
-            </Space>
-          )
-        },
-      },
-    ],
-    [],
-  )
-  const scroll = useMemo(() => {
-    return {
-      x: columns?.reduce((prev, current) => {
-        return prev + parseInt(String(current.width ?? 0))
-      }, 0),
-    }
-  }, [columns])
-
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-
-  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
-    setSelectedRowKeys(newSelectedRowKeys)
-  }
-  const rowSelection: TableRowSelection<IRepository> = {
-    selectedRowKeys,
-    onChange: onSelectChange,
-  }
-
-  const [openUpload, setOpenUpload] = useState(false)
-  const uploadRef = useRef<RepositoryUploadRef>(null)
-  const [uploading, setUploading] = useState(false)
 
   return (
     <div className={styles['repository-page']}>
       <div className={styles['repository-page__header']}>
-        <div className={styles['title']}>Knowledge Base</div>
+        <div className={styles['title']}>KNOWLEDGE BASE</div>
         <div className={styles['desc']}>
-          Wait for document parsing to complete before starting a chat.
+          Click a document to preview · Ask anything about these files in the chat
         </div>
       </div>
 
-      <div className={styles['repository-page__body']}>
-        <div className={styles['header']}>
-          <Input
-            placeholder="Search files"
-            prefix={<img src={IconSearch} />}
-            style={{ width: 210 }}
-          />
-
-          <Button type="primary" onClick={() => setOpenUpload(true)}>
-            <PlusOutlined />
-            Add File
-          </Button>
+      <div className={styles['repository-page__split']}>
+        <div className={styles['repository-page__list']}>
+          <div className={styles['list-header']}>DOCUMENTS</div>
+          {loading && <div className={styles['list-empty']}>Loading...</div>}
+          {!loading && data.length === 0 && (
+            <div className={styles['list-empty']}>No documents found</div>
+          )}
+          {data.map((doc) => (
+            <div
+              key={doc.key}
+              className={`${styles['list-item']} ${selected?.key === doc.key ? styles['selected'] : ''}`}
+              onClick={() => setSelected(doc)}
+            >
+              <FileIcon className={styles['item-icon']} suffix={doc.suffix as any} />
+              <span className={styles['item-name']} title={doc.name}>{doc.name}</span>
+              <span className={styles['item-badge']}>● IDX</span>
+            </div>
+          ))}
         </div>
 
-        <Table<IRepository>
-          rowKey="id"
-          columns={columns}
-          dataSource={data}
-          rowSelection={rowSelection}
-          scroll={scroll}
-          pagination={false}
-        />
+        {selected && selected.suffix === 'pdf' ? (
+          <div className={styles['repository-page__preview']}>
+            <div className={styles['preview-header']}>{selected.name}</div>
+            <iframe
+              src={`${API_BASE}/preview/${encodeURIComponent(selected.name)}#toolbar=0&view=FitH`}
+              className={styles['preview-iframe']}
+              title={selected.name}
+            />
+          </div>
+        ) : (
+          <div className={styles['repository-page__placeholder']}>
+            <div className={styles['placeholder-icon']}>📄</div>
+            <div className={styles['placeholder-text']}>SELECT A DOCUMENT TO PREVIEW</div>
+          </div>
+        )}
       </div>
-
-      <Modal
-        title="Upload File"
-        open={openUpload}
-        width={400}
-        destroyOnClose
-        onCancel={() => {
-          if (uploading) return
-          setOpenUpload(false)
-        }}
-        onOk={async () => {
-          setUploading(true)
-          try {
-            await uploadRef.current?.submit()
-            setOpenUpload(false)
-            refresh()
-          } finally {
-            setUploading(false)
-          }
-        }}
-      >
-        <RepositoryUpload beforeUpload={() => false} ref={uploadRef} />
-      </Modal>
     </div>
   )
 }

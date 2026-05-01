@@ -97,6 +97,33 @@
   }
 }
 
+.base-layout__nav {
+  padding: 12px 0;
+
+  .base-layout__nav-item {
+    padding: 10px 18px;
+    font-family: var(--px-font-pixel);
+    font-size: 7px;
+    letter-spacing: 1px;
+    color: var(--px-sky);
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: border-color 0.1s, background-color 0.1s;
+
+    &:hover {
+      background-color: rgba(255, 215, 0, 0.08);
+      border-left-color: var(--px-gold);
+      color: var(--px-gold);
+    }
+
+    &.active {
+      background-color: rgba(255, 215, 0, 0.12);
+      border-left-color: var(--px-gold);
+      color: var(--px-gold);
+    }
+  }
+}
+
 .base-layout__content {
   min-height: 100vh;
 }
