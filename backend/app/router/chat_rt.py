@@ -1,8 +1,10 @@
 import uuid
 import os
+import io
 import redis as redis_lib
 from fastapi import APIRouter, Body, Query, HTTPException, Request
-from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.responses import StreamingResponse, FileResponse, Response
+from pypdf import PdfReader, PdfWriter
 from dotenv import load_dotenv
 from schemas.chat import SessionResponse, ChatRequest
 from service.core.retrieval import retrieve_content, list_documents
@@ -60,6 +62,8 @@ async def create_session():
     }
 
 
+PREVIEW_MAX_PAGES = 20
+
 @router.get("/preview/{filename:path}")
 async def preview_document(filename: str):
     file_path = os.path.join(DOCS_DIR, filename)
@@ -67,7 +71,22 @@ async def preview_document(filename: str):
         raise HTTPException(status_code=400, detail="Invalid path")
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(file_path, media_type="application/pdf")
+
+    reader = PdfReader(file_path)
+    writer = PdfWriter()
+    for i, page in enumerate(reader.pages):
+        if i >= PREVIEW_MAX_PAGES:
+            break
+        writer.add_page(page)
+
+    buf = io.BytesIO()
+    writer.write(buf)
+    buf.seek(0)
+    return Response(
+        content=buf.getvalue(),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'inline; filename="preview.pdf"'},
+    )
 
 
 @router.get("/documents")
