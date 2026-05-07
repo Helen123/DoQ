@@ -1,8 +1,4 @@
 from openai import OpenAI
-from llama_index.core.data_structs import Node
-from llama_index.core.schema import NodeWithScore
-from llama_index.postprocessor.dashscope_rerank import DashScopeRerank
-import numpy as np
 from typing import List
 
 import os
@@ -43,6 +39,11 @@ def get_chat_completion_block(session_id, question, references):
         return f"Error: {str(e)}"
 
 def rerank_similarity(query, texts):
+    import numpy as np
+    from llama_index.core.data_structs import Node
+    from llama_index.core.schema import NodeWithScore
+    from llama_index.postprocessor.dashscope_rerank import DashScopeRerank
+
     api_key = os.getenv("DASHSCOPE_API_KEY")
     # 创建节点列表
     nodes = [NodeWithScore(node=Node(text=text), score=1.0) for text in texts]

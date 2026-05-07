@@ -29,9 +29,9 @@ RUN pip install --upgrade pip setuptools wheel
 # 设置工作目录
 WORKDIR /app
 
-# 拷贝依赖文件并安装
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+# 拷贝生产依赖文件并安装
+COPY requirements.prod.txt /app/
+RUN pip install --no-cache-dir -r requirements.prod.txt
 
 # 拷贝代码
 COPY . /app
