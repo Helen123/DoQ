@@ -25,3 +25,17 @@ export function chat(
     },
   )
 }
+
+export function quickParse(
+  params: { session_id: string; file: File },
+  options?: AxiosRequestConfig,
+) {
+  const form = new FormData()
+  form.append('session_id', params.session_id)
+  form.append('file', params.file)
+
+  return request.post('/quick_parse', form, {
+    loading: false,
+    ...options,
+  })
+}

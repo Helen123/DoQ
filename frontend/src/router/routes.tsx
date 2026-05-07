@@ -3,7 +3,12 @@ import NotFound from '@/pages/404'
 import Chat from '@/pages/chat'
 import Index from '@/pages/index'
 import Repository from '@/pages/repository'
-import { Outlet, RouteObject, createBrowserRouter, useLocation } from 'react-router-dom'
+import {
+  NonIndexRouteObject,
+  Outlet,
+  createBrowserRouter,
+  useLocation,
+} from 'react-router-dom'
 import { RouterGuard } from './guard'
 
 export type IRouteObject = {
@@ -12,7 +17,7 @@ export type IRouteObject = {
   auth?: boolean
   pure?: boolean
   meta?: any
-} & Omit<RouteObject, 'children'>
+} & Omit<NonIndexRouteObject, 'children'>
 
 export const routes: IRouteObject[] = [
   { path: '/', Component: Index },

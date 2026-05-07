@@ -19,6 +19,14 @@ import Source from './component/source'
 import styles from './index.module.scss'
 import { createChatId, createChatIdText, transportToChatEnter } from './shared'
 
+type HistoryItem = {
+  user_question?: string
+  model_answer?: string
+  think?: string
+  documents?: string
+  recommended_questions?: string
+}
+
 async function scrollToBottom() {
   await new Promise((resolve) => setTimeout(resolve))
 
@@ -52,7 +60,7 @@ export default function Index() {
   )
 
   const history = useRequest(
-    async () => {
+    async (): Promise<HistoryItem[]> => {
       return []
     },
     {

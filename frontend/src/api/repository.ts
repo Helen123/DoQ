@@ -7,3 +7,13 @@ export function list(params?: {}, options?: AxiosRequestConfig) {
     params,
   })
 }
+
+export function upload(params: { files: File }, options?: AxiosRequestConfig) {
+  const form = new FormData()
+  form.append('files', params.files)
+
+  return request.post('/upload', form, {
+    loading: false,
+    ...options,
+  })
+}

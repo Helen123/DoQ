@@ -1,4 +1,4 @@
-import '@fontsource/press-start-2p'
+import '@fontsource/press-start-2p/latin.css'
 import 'normalize.css'
 import { createRoot } from 'react-dom/client'
 import './antd.scss'

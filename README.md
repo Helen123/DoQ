@@ -93,3 +93,24 @@ User question
 - **Server**: Oracle Cloud Always Free (4 OCPU, 24GB RAM)
 - **Vector DB**: Qdrant Cloud free tier
 - **Domain + CDN**: Cloudflare
+
+Production deployment files are included:
+
+| File | Purpose |
+|------|---------|
+| `docker-compose.prod.yml` | Runs API, Redis, frontend, and Caddy |
+| `.env.production.example` | Domain and frontend build variables |
+| `backend/.env.example` | Backend secrets and service variables |
+| `deploy/Caddyfile` | HTTPS + `/api` reverse proxy |
+| `frontend/Dockerfile` | Builds and serves the Vite app |
+
+Quick start on the server:
+
+```bash
+cp .env.production.example .env
+cp backend/.env.example backend/.env
+# Edit .env and backend/.env
+docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+```
+
+Full instructions: `deploy/README.md`

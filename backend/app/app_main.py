@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from router import chat_rt
 import os
 
-root_path = os.getenv("ROOT_PATH", "http://localhost:8000")
+root_path = os.getenv("ROOT_PATH", "")
 
 app = FastAPI(root_path=root_path)
 
