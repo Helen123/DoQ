@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
 from service.core.file_parse import execute_insert_process
-from service.core.rag.utils.qdrant_conn import QdrantConnection
+from service.core.qdrant_store import QdrantConnection
 
 DOCS_DIR = os.path.join(os.path.dirname(__file__), "docs")
 

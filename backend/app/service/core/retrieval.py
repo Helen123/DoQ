@@ -1,5 +1,5 @@
 from service.core.embedding import generate_embedding
-from service.core.rag.utils.qdrant_conn import QdrantConnection, COLLECTION_NAME
+from service.core.qdrant_store import QdrantConnection, COLLECTION_NAME
 
 _qdrant = None
 
