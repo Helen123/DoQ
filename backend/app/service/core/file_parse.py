@@ -1,6 +1,6 @@
 import xxhash
 from service.core.rag.app.naive import chunk
-from service.core.rag.nlp.model import generate_embedding
+from service.core.embedding import generate_embedding
 from service.core.rag.utils.qdrant_conn import QdrantConnection
 from qdrant_client.models import PointStruct
 from typing import List

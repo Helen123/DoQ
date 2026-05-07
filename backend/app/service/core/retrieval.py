@@ -1,4 +1,4 @@
-from service.core.rag.nlp.model import generate_embedding
+from service.core.embedding import generate_embedding
 from service.core.rag.utils.qdrant_conn import QdrantConnection, COLLECTION_NAME
 
 _qdrant = None
