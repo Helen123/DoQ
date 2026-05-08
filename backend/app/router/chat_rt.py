@@ -30,7 +30,7 @@ def _redis():
 
 
 def check_rate_limit(guest_id: str) -> None:
-    """Redis 计数器，每个 guest_id 每天限制 DAILY_LIMIT 条消息。"""
+    """Redis counter for the daily guest message limit."""
     if not guest_id:
         raise HTTPException(status_code=400, detail="Missing X-Guest-ID header")
     try:
@@ -40,7 +40,7 @@ def check_rate_limit(guest_id: str) -> None:
         if count and int(count) >= DAILY_LIMIT:
             raise HTTPException(
                 status_code=429,
-                detail=f"每日 {DAILY_LIMIT} 条消息的限额已用完，明天再来吧！",
+                detail=f"You have reached the daily limit of {DAILY_LIMIT} messages. Please try again tomorrow.",
             )
         pipe = r.pipeline()
         pipe.incr(key)
@@ -49,7 +49,7 @@ def check_rate_limit(guest_id: str) -> None:
     except HTTPException:
         raise
     except Exception as e:
-        # Redis 故障时放行，避免服务不可用
+        # Allow the request if Redis is unavailable so the app stays usable.
         logger.warning(f"Rate limit check failed, allowing request: {e}")
 
 
