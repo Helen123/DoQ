@@ -230,6 +230,19 @@ export default function Index() {
             setDocuments(documents)
           }
 
+          if (json?.rag_trace) {
+            const incoming = json.rag_trace as API.RagTraceStep
+            const current = target.rag_trace ?? []
+            const index = current.findIndex((step) => step.id === incoming.id)
+
+            if (index >= 0) {
+              current[index] = { ...current[index], ...incoming }
+            } else {
+              current.push(incoming)
+            }
+            target.rag_trace = current
+          }
+
           if (json?.recommended_questions?.length) {
             target.recommended_questions = json.recommended_questions
           }

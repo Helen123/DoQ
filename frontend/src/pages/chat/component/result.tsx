@@ -3,13 +3,145 @@ import IconRefresh from '@/assets/chat/refresh.svg'
 import IconShare from '@/assets/chat/share.svg'
 import IconTip from '@/assets/chat/tip.svg'
 import Markdown from '@/components/markdown'
-import { ArrowRightOutlined } from '@ant-design/icons'
-import { Button, Dropdown } from 'antd'
+import {
+  ArrowRightOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  LoadingOutlined,
+} from '@ant-design/icons'
+import { Button, Collapse, Dropdown, Tag } from 'antd'
 import classNames from 'classnames'
 import dayjs from 'dayjs'
 import { TokenizerAndRendererExtension } from 'marked'
 import { useCallback, useMemo } from 'react'
 import styles from './result.module.scss'
+
+const TRACE_ORDER = ['query', 'embedding', 'search', 'rerank', 'context', 'llm']
+
+function formatValue(value: unknown): string {
+  if (Array.isArray(value)) {
+    return value.join(', ')
+  }
+  if (typeof value === 'number') {
+    return Number.isInteger(value) ? String(value) : value.toFixed(4)
+  }
+  if (typeof value === 'string') {
+    return value
+  }
+  if (value === null || value === undefined) {
+    return '-'
+  }
+  return JSON.stringify(value)
+}
+
+function statusIcon(status: API.RagTraceStep['status']) {
+  if (status === 'running') return <LoadingOutlined />
+  if (status === 'complete') return <CheckCircleOutlined />
+  if (status === 'error') return <CloseCircleOutlined />
+  return <ClockCircleOutlined />
+}
+
+function RagTrace(props: {
+  steps?: API.RagTraceStep[]
+  onRefrence?: (index: number) => void
+}) {
+  const { steps, onRefrence } = props
+
+  const ordered = useMemo(() => {
+    return [...(steps ?? [])].sort((a, b) => {
+      const aIndex = TRACE_ORDER.indexOf(a.id)
+      const bIndex = TRACE_ORDER.indexOf(b.id)
+      return (aIndex === -1 ? 99 : aIndex) - (bIndex === -1 ? 99 : bIndex)
+    })
+  }, [steps])
+
+  if (!ordered.length) return null
+
+  return (
+    <div className={styles['rag-trace']}>
+      <div className={styles['rag-trace__flow']}>
+        {ordered.map((step, index) => (
+          <div className={styles['rag-trace-node-wrap']} key={step.id}>
+            <div
+              className={classNames(
+                styles['rag-trace-node'],
+                styles[`rag-trace-node--${step.status}`],
+              )}
+            >
+              <span className={styles['rag-trace-node__icon']}>
+                {statusIcon(step.status)}
+              </span>
+              <span className={styles['rag-trace-node__title']}>
+                {step.title}
+              </span>
+            </div>
+            {index < ordered.length - 1 ? (
+              <ArrowRightOutlined className={styles['rag-trace__arrow']} />
+            ) : null}
+          </div>
+        ))}
+      </div>
+
+      <Collapse
+        ghost
+        size="small"
+        className={styles['rag-trace__details']}
+        items={ordered.map((step) => ({
+          key: step.id,
+          label: (
+            <div className={styles['rag-trace-panel-title']}>
+              <span>{step.title}</span>
+              <Tag bordered={false}>{step.status}</Tag>
+            </div>
+          ),
+          children: (
+            <div className={styles['rag-trace-panel']}>
+              <p>{step.description}</p>
+
+              {step.details ? (
+                <div className={styles['rag-trace-kv']}>
+                  {Object.entries(step.details).map(([key, value]) => (
+                    <div className={styles['rag-trace-kv__row']} key={key}>
+                      <span>{key.replace(/_/g, ' ')}</span>
+                      <strong>{formatValue(value)}</strong>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {step.matches?.length ? (
+                <div className={styles['rag-trace-matches']}>
+                  {step.matches.map((match) => (
+                    <button
+                      className={styles['rag-trace-match']}
+                      key={`${step.id}-${match.rank}`}
+                      onClick={() => onRefrence?.(match.rank - 1)}
+                      type="button"
+                    >
+                      <span className={styles['rag-trace-match__rank']}>
+                        #{match.rank}
+                      </span>
+                      <span className={styles['rag-trace-match__body']}>
+                        <strong>{match.document_name || 'Untitled'}</strong>
+                        <span>{match.content_preview}</span>
+                      </span>
+                      {typeof match.score === 'number' ? (
+                        <span className={styles['rag-trace-match__score']}>
+                          {match.score.toFixed(4)}
+                        </span>
+                      ) : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ),
+        }))}
+      />
+    </div>
+  )
+}
 
 export function Result(props: {
   item: API.ChatItem
@@ -106,6 +238,8 @@ export function Result(props: {
       {item.error ? (
         <div className={styles['chat-message-result__error']}>{item.error}</div>
       ) : null}
+
+      <RagTrace steps={item.rag_trace} onRefrence={onRefrence} />
 
       {item.loading ? null : (
         <>

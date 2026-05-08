@@ -1,13 +1,14 @@
 import uuid
 import os
 import io
+import json
 import redis as redis_lib
 from fastapi import APIRouter, Body, Query, HTTPException, Request
 from fastapi.responses import StreamingResponse, FileResponse, Response
 from pypdf import PdfReader, PdfWriter
 from dotenv import load_dotenv
 from schemas.chat import SessionResponse, ChatRequest
-from service.core.retrieval import retrieve_content, list_documents
+from service.core.retrieval import retrieve_content_with_trace, list_documents
 from service.core.chat import get_chat_completion
 from utils import logger
 
@@ -110,14 +111,40 @@ async def chat_on_docs(
     question = body.message
     logger.info(f"guest={guest_id[:8]}... session={session_id} q={question[:60]}")
 
-    try:
-        references = retrieve_content(question)
-        logger.info(f"Retrieved {len(references)} chunks")
-    except Exception as e:
-        logger.warning(f"Retrieval failed: {e}")
+    def event_stream():
         references = []
+        try:
+            trace = retrieve_content_with_trace(question)
+            while True:
+                try:
+                    step = next(trace)
+                    yield f"event: message\ndata: {json.dumps({'rag_trace': step}, ensure_ascii=False)}\n\n"
+                except StopIteration as result:
+                    references = result.value or []
+                    break
+            logger.info(f"Retrieved {len(references)} chunks")
+        except Exception as e:
+            logger.warning(f"Retrieval failed: {e}")
+            step = {
+                "id": "search",
+                "title": "Retrieval",
+                "status": "error",
+                "description": str(e),
+            }
+            yield f"event: message\ndata: {json.dumps({'rag_trace': step}, ensure_ascii=False)}\n\n"
 
-    return StreamingResponse(
-        get_chat_completion(session_id, question, references),
-        media_type="text/event-stream",
-    )
+        llm_step = {
+            "id": "llm",
+            "title": "LLM Answer",
+            "status": "running",
+            "description": "Sending the packed context to Qwen and streaming the answer back.",
+            "details": {
+                "model": "qwen2.5-72b-instruct",
+                "context_chunks": len(references),
+            },
+        }
+        yield f"event: message\ndata: {json.dumps({'rag_trace': llm_step}, ensure_ascii=False)}\n\n"
+
+        yield from get_chat_completion(session_id, question, references)
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")

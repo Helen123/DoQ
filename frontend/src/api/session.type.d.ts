@@ -18,6 +18,7 @@ declare namespace API {
 
     documents?: Document[]
     reference?: Reference[]
+    rag_trace?: RagTraceStep[]
     recommended_questions?: string[]
   }
 
@@ -32,6 +33,23 @@ declare namespace API {
     document_id: string
     document_name: string
     content_with_weight: string
+    score?: number
     positions: number[][]
+  }
+
+  interface RagTraceMatch {
+    rank: number
+    score?: number
+    document_name: string
+    content_preview: string
+  }
+
+  interface RagTraceStep {
+    id: string
+    title: string
+    status: 'pending' | 'running' | 'complete' | 'error'
+    description: string
+    details?: Record<string, unknown>
+    matches?: RagTraceMatch[]
   }
 }

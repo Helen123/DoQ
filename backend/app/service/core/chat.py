@@ -99,6 +99,17 @@ def get_chat_completion(session_id: str, question: str, retrieved_content: list)
                         yield f"event: message\ndata: {json.dumps({'recommended_questions': questions})}\n\n"
                 except Exception as e:
                     logger.error(f"Recommended questions failed: {e}")
+                step = {
+                    "id": "llm",
+                    "title": "LLM Answer",
+                    "status": "complete",
+                    "description": "The final answer has been generated from the retrieved context.",
+                    "details": {
+                        "model": "qwen2.5-72b-instruct",
+                        "context_chunks": len(retrieved_content),
+                    },
+                }
+                yield f"event: message\ndata: {json.dumps({'rag_trace': step}, ensure_ascii=False)}\n\n"
                 yield "event: end\ndata: [DONE]\n\n"
                 break
             else:
